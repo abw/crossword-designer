@@ -1,34 +1,38 @@
 //----------------------------------------------------------------------------
 // WARNING!  Any changes you make to this file may be lost!
 // This file is generated from templates/js/icons.jsx
-// when you run 'bin/icons/build' from the command line.
+// when you run the 'bin/icons' script from the command line.
 //----------------------------------------------------------------------------
 import { library } from '@fortawesome/fontawesome-svg-core'
 
 // import FontAwesome solid icons
 import {
+    faAdjust as faAdjustSolid,
     faArrowUp as faArrowUpSolid,
     faArrowDown as faArrowDownSolid,
     faArrowLeft as faArrowLeftSolid,
     faArrowRight as faArrowRightSolid,
+    faCheckSquare as faCheckSquareSolid,
+    faFont as faFontSolid,
 } from '@fortawesome/free-solid-svg-icons'
 
 // import FontAwesome regular (outline) icons
 import {
     faCheckCircle as faCheckCircleRegular,
-    faCheckSquare as faCheckSquareRegular,
     faCircle as faCircleRegular,
     faDotCircle as faDotCircleRegular,
 } from '@fortawesome/free-regular-svg-icons'
 
 // add solid and regular icons to library
 library.add(
+    faAdjustSolid,
     faArrowUpSolid,
     faArrowDownSolid,
     faArrowLeftSolid,
     faArrowRightSolid,
+    faCheckSquareSolid,
+    faFontSolid,
     faCheckCircleRegular,
-    faCheckSquareRegular,
     faCircleRegular,
     faDotCircleRegular,
 );
@@ -49,15 +53,17 @@ library.add(
 export const icons = {
   regular: [
     'check-circle',
-    'check-square',
     'circle',
     'dot-circle',
   ],
   solid: [
+    'adjust',
     'arrow-up',
     'arrow-down',
     'arrow-left',
     'arrow-right',
+    'check-square',
+    'font',
   ],
   custom: [
   ],

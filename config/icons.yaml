@@ -16,14 +16,16 @@
 
 ---
 solid:
+  - adjust
   - arrow-up
   - arrow-down
   - arrow-left
   - arrow-right
+  - check-square
+  - font
 
 regular:
   - check-circle
-  - check-square
   - circle
   - dot-circle
 

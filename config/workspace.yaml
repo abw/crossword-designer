@@ -1,0 +1,5 @@
+---
+# we don't really need anything in here except to shut up a stupid warning
+schemas:
+  templates:
+    cache:          1 day

@@ -1,0 +1,6 @@
+#----------------------------------------------------------------------------
+# The file contains general metadata for the project.
+#----------------------------------------------------------------------------
+type:               project
+title:              Crossword Designer
+version:            100

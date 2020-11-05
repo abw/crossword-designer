@@ -1,0 +1,74 @@
+#=============================================================================
+# templates.yaml
+#
+# This configuration file contains definitions for various different template
+# engines that we use in the Crosssword Designer project.  It is loaded
+# and used by the Contentity::Component::Templates module which is then
+# responsible for using the various configuration options to construct one
+# or more template engines for rendering different template types.
+#
+# Andy Wardley <abwe@wardley.org> November 2020
+#
+#=============================================================================
+
+#-----------------------------------------------------------------------------
+# common
+#
+# These template definitions are shared by most other templating engines
+#-----------------------------------------------------------------------------
+
+common:
+    # The module we use to render templates
+    engine:         XWord::Template
+
+    # We resolve all template directories relative to a workspace.  We assume
+    # that the workspace will have a 'templates' directory or provide a
+    # mapping in config/dirs.yaml that maps it somewhere else.  So a 'library'
+    # template directory would be resolve via a call to the workspace as
+    # $workspace->dir('templates', 'library') which might return something like
+    # <ROOT>/templates/library
+    templates_dir:  templates
+
+    # Any additional directories which should be added to the template path
+    # for source templates to include library templates from.  These are
+    # relative to a workspace's templates directory.
+    library_dir:    library
+    library_up:     true
+
+    # These configuration template(s) are processed before each page template
+    # to setup any configuration variable or perform other pre-processing
+    #config:         site/config
+
+    # After a page template is processed, the content is injected into a wrapper
+    # template, typically to add HTML headers, footers, page layout and so on.
+    # The master/wrapper template takes care of that for most web pages.
+    #wrapper:        site/wrapper
+
+#-----------------------------------------------------------------------------
+# The 'scaffold' template engine is used to create various configuration files
+# and other bits and pieces when either a project, site, or other workspace
+# is configured, e.g. via bin/configure or bin/site/configure.  Scaffolding
+# templates have their own directory ('scaffold' instead of 'templates').
+# For the source templates we currently have an ugly hack in the
+# Contentity::Component::Templates module that injects the workspace type
+# (project, site, portfolio, etc) into the source_dir definition.  We also
+# set the output_dir to be the workspace directory ('.').
+#-----------------------------------------------------------------------------
+scaffold:
+    engine:         XWord::Template
+    templates_dir:  scaffold
+    source_dir:     <workspace_type>
+    source_up:      true
+    library_dir:    library
+    library_up:     true
+    output_dir:     '.'
+
+
+#-----------------------------------------------------------------------------
+# js - used by bin/icons to generate src/config/icons.jsx
+#-----------------------------------------------------------------------------
+js:
+    base:           common
+    source_dir:     js
+    library_dir:    library
+    output_dir:     src/config

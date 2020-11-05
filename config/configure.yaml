@@ -1,0 +1,137 @@
+#-----------------------------------------------------------------------------
+# This configure file is used to drive the bin/configure script.
+#-----------------------------------------------------------------------------
+
+items:
+  - type:           section
+    title:          Crossword Designer Configuration
+    instructions:   1
+    about:          |
+                    This script is used to perform the initial configuration of the Crossword Designer.
+                    It prompts you to confirm a number of configuration values and then processes the
+                    templates in the 'scaffold/project' directory to generate various project files.
+                    Note that this overwrites any existing files so you may want to do a dry run
+                    (-n option) first to check what it's going to do.
+
+                    Run with the help option (-h or --help) to see all command line options.
+
+  - type:           section
+    title:          Project Configuration
+    about:          |
+                    We need to know where you're installing this.  In most cases, this will
+                    be the current working directory so you can just accept the default.
+    items:
+      - name:       root
+        option:     root
+        title:      Project root directory
+        mandatory:  1
+      - name:       deployment
+        option:     deployment
+        title:      Deployment mode
+        default:    development
+        comment:      |
+                    Enter the deployment mode.  Select "production" for
+                    the main production server or "maintenance" to put
+                    the site in maintenance mode.  Use "development"
+                    for development servers
+        mandatory:  1
+        options:
+            - development
+            - production
+            - maintenance
+  -
+    name:           domains
+    title:          Domain Names
+    list:           domain
+    default:
+      - xword.local.wardley.org
+      - xword.wardley.org
+    about:          |
+                    Enter one or more domain names for this server.
+
+                    The DNS should be configured to allow wildcard matches for the domain.
+                    For example, *.local.wardley.org resolves to 127.0.0.0.
+
+  - type:           section
+    name:           apache
+    title:          Apache Web Server
+    about:          |
+                    We need some details about the Apache web server to generate configuration
+                    files for it.
+
+    items:
+      - name:       ip_address
+        option:     ip_address
+        title:      IP address
+        default:    "*"
+      - name:       port
+        option:     port
+        title:      Apache port
+        default:    80
+      - name:       apachectl
+        option:     apachectl
+        title:      Apache control script
+        default:    program:apachectl
+      - name:       version
+        option:     apache_version
+        title:      Apache Version
+        default:    2.4
+        comment:    |
+                    Apache version 2.4 upwards requires some additional directives in
+                    the configuration files.  Enter the major (first) and minor (second)
+                    version number.  You can omit the revision (third) number.
+                    e.g. 2.2 or 2.4
+
+  - type:           section
+    title:          External Programs
+    name:           program
+    about:          |
+                    We need to ask you where some external programs are located.
+                    Some of these are only required if you're using the relevant
+                    extensions.
+    items:
+      - name:       perl
+        option:     perl
+        title:      Path to perl
+        default:    program:perl
+        mandatory:  1
+      - name:       rotatelogs
+        option:     rotatelogs
+        title:      RotateLogs Apache extension for rotating log files
+        default:    program:rotatelogs
+        mandatory:  0
+
+  - type:           section
+    title:          Other Options
+    prompt:         0
+    items:
+      - name:       yes
+        option:     yes
+        short:      y
+        title:      Accept all defaults
+        is_flag:    1
+        is_config:  1
+      - name:       nothing
+        option:     nothing
+        short:      n
+        title:      Do nothing (dry run)
+        is_flag:    1
+        is_config:  1
+      - name:       verbose
+        option:     verbose
+        short:      v
+        title:      Verbose mode
+        is_flag:    1
+        is_config:  1
+      - name:       quiet
+        option:     quiet
+        short:      q
+        title:      Quiet mode
+        is_flag:    1
+        is_config:  1
+      - name:       help
+        option:     help
+        short:      h
+        title:      This help
+        is_flag:    1
+        is_config:  1

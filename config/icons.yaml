@@ -1,0 +1,34 @@
+# This file contains the list of Fontawesome 5 icons that we want to use in the
+# site.  Fontawesome has 2 free sets: the solid icons and the "regular" icons
+# (which more accurately should be called the "outline" icons).  The "solid"
+# and "regular" lists below show which of those icons we're using.
+#
+# There is also an "alias" mapping at the end of the file which allows us
+# the create some shorter aliases to other icons, e.g. "warning" is an alias
+# for the "exclamation-triangle" icon in the "solid" set.
+#
+# To add another Fontawesome icon, simply add its name to the appropriate list
+# and then run the bin/icons script.
+#
+# If you want to add a custom icon (i.e. one that isn't in Fontawesome) then
+# add an SVG file to the icons directory and run the bin/icons script.
+#
+
+---
+solid:
+  - arrow-up
+  - arrow-down
+  - arrow-left
+  - arrow-right
+
+regular:
+  - check-circle
+  - check-square
+  - circle
+  - dot-circle
+
+alias:
+  checked:      solid:check-square
+  dotted:       regular:dot-circle
+
+

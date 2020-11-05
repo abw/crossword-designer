@@ -1,0 +1,166 @@
+#!/usr/bin/env perl
+#
+# Perl script to simplify the process of creating a custom Fontawesome icon
+# library for use in JS/React library apps from the list of icons defined
+# in config/icons.yaml.
+#
+# These can be a mixture of solid icons (from @fortawesome/free-solid-svg-icons),
+# regular (outline) icons (from @fortawesome/free-regular-svg-icons) or custom
+# icons (in icons/custom).  It also allows aliases to be defined for certain
+# icons (e.g. "warning" as an alias for "exclamation-triangle").
+#
+# Custom icons (i.e. those that aren't in Fontawesome) can be added as SVG
+# files in the icons directory.  This script will incorporate them into the
+# font set.
+#
+# The script renders the templates/js/icons.js template and writes the output
+# to src/config/icons.js.  This is then imported into the src/ui/Icon.jsx
+# component which renders an icon from the library.
+#
+# The following packages must be added to your JS/React app:
+#   yarn add @fortawesome/fontawesome-svg-core
+#   yarn add @fortawesome/react-fontawesome
+#   yarn add @fortawesome/free-solid-svg-icons
+#   yarn add @fortawesome/free-regular-svg-icons
+#
+# There should also be a section in the config/templates.yaml file for
+# rendering JS templates which looks something like this:
+#   js:
+#       base:           common
+#       config:         site/nothing
+#       source_dir:     js
+#       library_dir:    library
+#       output_dir:     src/config
+#
+# Andy Wardley <abw@wardley.org>
+# August 2020
+#
+
+use Badger lib => '../perl/lib';
+use XWord;
+use constant {
+    ICONS_CFG => 'icons',       # config/icons.yaml
+    ICONS_DIR => 'icons',       # icons directory for custom icons
+    ICONS_JSX => 'icons.jsx',   # src/config/icons.jsx for JS configuration
+};
+
+# Read the config/icons.yaml file
+my $icons = XWord->config(ICONS_CFG);
+
+# Walk through the lists of solid and regular icons and convert the simple
+# icon name into a hash array (see convert_icon_name() below)
+for my $style (qw( solid regular )) {
+    my $list = $icons->{ $style } || next;
+    $icons->{ $style } = [
+        map { convert_icon_name($style, $_) }
+        @$list
+    ]
+}
+
+# The list of aliases maps a short alias to <style>:<name>, e.g.
+# to create a "basket" alias which maps the the "shopping-basket"
+# alias in the solid icon set. We have this in the config/icons.yaml:
+#   alias:
+#      basket: solid:shopping-basket
+#
+my $aliases = $icons->{ alias };
+
+for my $alias (keys %$aliases) {
+    my $map = $aliases->{ $alias };
+    my ($style, $name) = split(':', $map);
+    my $icon = convert_icon_name($style, $name);
+    $icon->{ alias } = $alias;
+    $aliases->{ $alias } = $icon;
+}
+
+# custom icons defined in icons directory
+my $icondir = XWord->dir(ICONS_DIR);
+my $files   = $icondir->files;
+my $code    = 1;
+my $customs = $icons->{ custom } = [ ];
+
+for my $custom (sort @$files) {
+    my $cname = $custom->basename;
+    my $svg   = $custom->read;
+    my $data  = read_svg_file($cname, $svg);
+    $data->{ code } = sprintf("e%03d", $code++);
+    push(@$customs, $data);
+    # XWord->debug_data("custom:$cname => ", $data);
+}
+
+# Uncomment this line to dump the final data to the STDERR
+# XWord->debug_data( icons => $icons );
+
+# Now generate the src/config/icons.jsx file from the
+# templates/js/icons.jsx template
+XWord->renderer('js')->process(
+    ICONS_JSX,
+    { icons => $icons },
+    ICONS_JSX,
+);
+
+#========================================================================
+# End of main script
+#========================================================================
+
+# Subroutine to convert a simple icon name (e.g. shopping-basket) into a
+# hash array like this:
+#    {
+#        id     => faShoppingBasketSolid,
+#        name   => shopping-basket
+#        faname => faShoppingBasket,
+#    },
+sub convert_icon_name {
+    my $style  = shift;
+    my $name   = shift;
+    my $faname = join(
+        '',
+        'fa',
+        map { ucfirst $_ }
+        split(/[-_]/, $name)
+    );
+    return {
+        id      => $faname . ucfirst($style),
+        name    => $name,
+        faname  => $faname,
+    };
+}
+
+sub read_svg_file {
+    my ($name, $svg) = @_;
+    my ($width, $height, $path, $var);
+
+    #print "reading [$name] = $svg";
+
+    # This is imperfect because some SVGs don't define width and height but instead
+    # use viewBox="x y width height".  However it works for all the custom icons that
+    # I've created so it's good enough for now.
+    $svg =~ /width="(\d+)(px)?"/ || return svg_fail("Cannot read width in $name");
+    $width = $1;
+
+    $svg =~ /height="(\d+)(px)?"/ || return svg_fail("Cannot read height in $name");
+    $height = $1;
+
+    $svg =~ /path[^>]+d="([^"]*)"/ || return svg_fail("Cannot read path data in $name");
+    $path = $1;
+    $path =~ s/\s+/ /g;
+
+    $name =~ s/\.svg$//;
+    $var = $name;
+    $var =~ s/\W+/_/g;
+
+    return {
+        prefix => 'fas',        # use the default fontawesome prefix
+        var    => $var,
+        name   => $name,
+        path   => $path,
+        width  => $width,
+        height => $height,
+    };
+}
+
+sub svg_fail {
+    my $msg = shift;
+    warn $msg, "\n";
+    return undef;
+}

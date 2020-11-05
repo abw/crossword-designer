@@ -1,12 +1,13 @@
 import React from 'react'
+import Context from './Context'
+import classname from 'classnames'
 
-function Cell({cell, setCell}) {
-  //let [black, setBlack] = React.useState(false);
-  //console.log('cell: ', cell);
-
-  return <div className={`cell ${cell.black?'black':'white'}`} onClick={() => setCell(cell.x, cell.y, { black: !cell.black })}>
+function Cell({cell, action}) {
+  return <div
+      className={classname('cell', { black: cell.black, focus: cell.focus })}
+      onClick={() => action(cell.x, cell.y)}>
     {/* {cell.x},{cell.y} */}
   </div>
 }
 
-export default Cell
+export default Context.Consumer(Cell)

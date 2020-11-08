@@ -1,0 +1,12 @@
+sudo mysql << EOF
+CREATE DATABASE words;
+USE words;
+
+CREATE TABLE words (
+    id      int(10) unsigned NOT NULL AUTO_INCREMENT,
+    words   varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+    letters varchar(255) DEFAULT NULL,
+    PRIMARY KEY (id),
+    KEY letters (letters)
+)   ENGINE=MyISAM AUTO_INCREMENT=100000 DEFAULT CHARSET=utf8;
+EOF

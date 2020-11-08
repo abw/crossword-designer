@@ -1,0 +1,23 @@
+#!/usr/bin/env perl
+
+use Badger;
+use Badger::Database;
+use Badger::Rainbow [ANSI => 'cyan'];
+use Contentity::Utils 'prompt';
+
+my $db = Badger::Database->new(
+    engine   => 'MariaDB',
+    database => 'words',
+);
+my $query = $db->query('select words, letters from words where letters like ?');
+
+print cyan "Word Search by Andy Wardley. Use '.' for missing letters.  Enter 'exit' to exit\n";
+while (1) {
+    my $lookup = shift || prompt("Search") || exit;
+    exit if $lookup =~ 'exit';
+    $lookup =~ s/\W/_/g;
+    my $rows = $query->rows($lookup);
+    for my $row (@$rows) {
+        printf("%-20s %s\n", $row->{ letters }, $row->{ words });
+    }
+}

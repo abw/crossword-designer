@@ -1,19 +1,16 @@
-$blue: #2185D0;
 $red: #DB2828;
+$green: #21BA45;
+$blue: #2185D0;
 $grey: #7f7f7a;
 $black: #000000;
+$white: #ffffff;
+
+@import "~bootstrap/scss/bootstrap";
 
 .crossword {
   --nav-bg-color: #234;
   header {
     height: 3rem;
-    background-color: var(--nav-bg-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    color: white;
   }
   main {
     max-width: 1000px;
@@ -21,7 +18,9 @@ $black: #000000;
     margin: 0 auto;
     padding: 1em;
     height: calc(100vh - 6rem);
-    display: flex;
+    .designer {
+      display: flex;
+    }
   }
   footer {
     height: 3rem;
@@ -36,24 +35,56 @@ $black: #000000;
 }
 
 .grid {
-  .row {
+  .rowx {
     font-size: 0;
+    display: flex;
     .cell {
-      display: inline-block;
+      display: block;
+      position: relative;
+      margin: 0;
+      padding: 0;
       width: 2rem;
       height: 2rem;
       background: white;
       border-bottom: 1px solid black;
       border-right: 1px solid black;
-      font-size: 0.8rem;
+      font-size: 1.2rem;
+      text-align: center;
+      line-height: 2rem;
+      color: $black;
       &:hover {
-        color: white;
         background-color: rgba($blue, 0.2);
+        color: $blue;
         cursor: pointer;
       }
       &.focus {
         background-color: $blue;
         color: white;
+        position: relative;
+        &.horz::before {
+          content: " ";
+          width: 0;
+          height: 0;
+          position: absolute;
+          transform: translate(0, -50%);
+          right: -1rem;
+          top: 50%;
+          border: 0.5rem solid transparent;
+          border-left-color: $blue;
+          z-index: 1000;
+        }
+        &.vert::after {
+          content: " ";
+          width: 0;
+          height: 0;
+          position: absolute;
+          bottom: -1rem;
+          left: 50%;
+          transform: translate(-50%, 0);
+          border: 0.5rem solid transparent;
+          border-top-color: $blue;
+          z-index: 1000;
+        }
       }
       &:first-child {
         border-left: 1px solid black;
@@ -70,6 +101,15 @@ $black: #000000;
         &.focus:hover {
           background-color: mix($red, $black, 60%);
         }
+      }
+      .number {
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        font-size: 0.6rem;
+        line-height: 1;
+        width: 100%;
+        text-align: left;
       }
     }
     &:first-child .cell {
@@ -99,4 +139,55 @@ $black: #000000;
       color: white;
     }
   }
+}
+
+.button {
+  padding: 0.5em 1em;
+  border: none;
+  background-color: mix($grey, $white, 50%);
+  border-radius: 0.2rem;
+  margin: 0 0.5rem 0.5rem 0;
+  margin-right: 0.5rem;
+  &:last-child {
+    margin-right: 0;
+  }
+  .icon.on-left {
+    margin-right: 0.75em;
+  }
+  &:hover {
+    background-color: mix($grey, $white, 30%);
+  }
+  &.red {
+    background-color: $red;
+    color: $white;
+    &:hover {
+      background-color: mix($red, $white, 90%);
+    }
+  }
+  &.green {
+    background-color: $green;
+    color: $white;
+    &:hover {
+      background-color: mix($green, $white, 90%);
+    }
+  }
+  &.blue {
+    background-color: $blue;
+    color: $white;
+    &:hover {
+      background-color: mix($blue, $white, 90%);
+    }
+  }
+}
+
+@media print {
+  .crossword {
+    header, footer, .controls {
+      display: none;
+    }
+  }
+}
+
+.wide {
+  width: 100%;
 }

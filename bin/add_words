@@ -1,0 +1,58 @@
+#!/usr/bin/env perl
+
+use Badger;
+use Badger::Filesystem 'File';
+use Badger::Database;
+use DBI;
+
+our $WORDS   = '/usr/share/dict/web2';
+our $PHRASES = '/usr/share/dict/web2a';
+our $SRCDB   = 'eng_news_2016_100K';
+our $OUTDB   = 'words';
+our $SEEN    = { };
+
+my $outdb = Badger::Database->new(
+    engine   => 'MariaDB',
+    database => $OUTDB,
+);
+my $insert = $outdb->query('INSERT INTO words(words, letters) VALUES (?, ?)');
+
+read_words_file($WORDS);
+read_words_file($PHRASES);
+read_words_db();
+
+sub read_words_file {
+    my $file  = File(shift);
+    my @lines = $file->read;
+    for my $word (@lines) {
+        chomp $word;
+        next if $word =~ /\W/;
+        add($word);
+    }
+}
+
+sub read_words_db {
+    my $db = Badger::Database->new(
+        engine   => 'MariaDB',
+        database => $SRCDB,
+    );
+    my $rows = $db->rows('SELECT word, freq FROM words');
+    for my $row (@$rows) {
+        my $word = $row->{ word };
+        my $freq = $row->{ freq };
+        $word =~ s/'`//g;
+        next if $word =~ /[^a-z\s\-]/i;
+        next if $word =~ /\d/;
+        add($word);
+    }
+}
+
+
+sub add {
+    my $words = shift;
+    my $letters = uc $words;
+    $letters =~ s/[\W]//g;
+    return if length $letters < 3;
+    return if $SEEN->{ $letters }++;
+    $insert->execute($words, $letters);
+}

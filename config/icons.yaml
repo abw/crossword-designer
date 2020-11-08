@@ -22,7 +22,15 @@ solid:
   - arrow-left
   - arrow-right
   - check-square
+  - download
+  - file-export
+  - file-import
   - font
+  - save
+  - times
+  - trash
+  - upload
+
 
 regular:
   - check-circle

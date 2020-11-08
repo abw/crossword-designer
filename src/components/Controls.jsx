@@ -1,9 +1,9 @@
 import React from 'react'
 import Context from './Context'
 import classname from 'classnames'
-import { Icon } from '../ui/ui'
+import { Button, Icon } from '../ui/ui'
 
-function Controls({tools, toolNo, selectTool, symmetries, symmetry, setSymmetry}) {
+function Controls({tools, toolNo, selectTool, symmetries, symmetry, setSymmetry, save, load, clear}) {
   return <div className="controls">
     <h2>Controls</h2>
     { tools.map(
@@ -17,6 +17,9 @@ function Controls({tools, toolNo, selectTool, symmetries, symmetry, setSymmetry}
           {s.text}
         </div>
     )}
+    <Button text="Clear" className="red" iconLeft="trash"   onClick={clear}/>
+    <Button text="Load" className="blue" iconLeft="upload"   onClick={load}/>
+    <Button text="Save" className="green" iconLeft="download" onClick={save}/>
   </div>
 }
 

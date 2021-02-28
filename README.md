@@ -15,4 +15,4 @@ Run `yarn install` and then `yarn start` to run the front-end React app via a de
 
 ## Back End
 
-There's the basic framework of a back-end written in Perl that I intended to use to server candidate words from a database.  I didn't get very far with that.  It's probably best if you just ignore it.
+There's the basic framework of a back-end written in Perl that I intended to use to serve candidate words from a database.  I didn't get very far with that.  It's probably best if you just ignore it.

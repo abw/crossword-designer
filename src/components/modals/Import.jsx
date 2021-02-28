@@ -13,11 +13,15 @@ function Import({importVisible, hideImport, importData}) {
       <Modal.Title>Upload Data</Modal.Title>
     </Modal.Header>
     <Modal.Body>
+      <p>
+        Paste the raw data previously downloaded from another crossword puzzle into the
+        text box below then click on the upload button.
+      </p>
       <textarea className="wide" onChange={e => setData(e.target.value)} rows={12}></textarea>
     </Modal.Body>
     <Modal.Footer>
       <Button onClick={hideImport} text="Close" iconRight="times"/>
-      <Button className="green" onClick={onImport} text="Import" iconRight="upload"/>
+      <Button className="green" onClick={onImport} text="Upload" iconRight="upload"/>
     </Modal.Footer>
   </Modal>
 }

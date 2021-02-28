@@ -10,17 +10,22 @@ class Context extends React.Component {
     const size   = props.size || 15;
     const toolNo = 0;
     const tool   = tools[toolNo];
+    const mode   = 'grid';
     this.actions = {
-      selectTool:  this.selectTool.bind(this),
-      setSymmetry: this.setSymmetry.bind(this),
-      setCell:     this.setCell.bind(this),
-      toggleCell:  this.toggleCell.bind(this),
-      focusCell:   this.focusCell.bind(this),
-      save:        this.save.bind(this),
-      load:        this.load.bind(this),
-      clear:       this.clear.bind(this),
-      importData:  this.importData.bind(this),
-      exportData:  this.exportData.bind(this),
+      setGridMode:  this.setGridMode.bind(this),
+      setWordsMode: this.setWordsMode.bind(this),
+      setCluesMode: this.setCluesMode.bind(this),
+      //selectTool:   this.selectTool.bind(this),
+      setSymmetry:  this.setSymmetry.bind(this),
+      clickCell:    this.clickCell.bind(this),
+      setCell:      this.setCell.bind(this),
+      toggleCell:   this.toggleCell.bind(this),
+      focusCell:    this.focusCell.bind(this),
+      save:         this.save.bind(this),
+      load:         this.load.bind(this),
+      clear:        this.clear.bind(this),
+      importData:   this.importData.bind(this),
+      exportData:   this.exportData.bind(this),
     };
     const action = this.actions[tool.action];
 
@@ -29,6 +34,7 @@ class Context extends React.Component {
       toolNo,
       tool,
       action,
+      mode,
       tools: tools,
       symmetry: 2,
       symmetries: symmetries,
@@ -52,7 +58,8 @@ class Context extends React.Component {
     this.importData(this.storage.load({ size: false, cells: false }));
   }
   importData(data) {
-    const {size, cells} = data;
+    let {size, cells} = data;
+    cells = Array.isArray(cells) ? cells : cells.split('');
     if (size) {
       console.log('Loaded size: ', size);
       const rows = [...Array(size)].map(
@@ -85,6 +92,7 @@ class Context extends React.Component {
         )
       )
     );
+    cells = cells.join('');
     return {size, cells};
   }
   clear() {
@@ -102,8 +110,30 @@ class Context extends React.Component {
     this.setState({ toolNo, tool, action });
     this.blurCell();
   }
+  setMode(mode) {
+    this.setState({mode});
+    this.blurCell();
+  }
+  setGridMode() {
+    this.setMode("grid");
+  }
+  setWordsMode() {
+    this.setMode("words");
+  }
+  setCluesMode() {
+    this.setMode("clues");
+  }
   setSymmetry(symmetry) {
     this.setState({ symmetry });
+  }
+  clickCell(x, y) {
+    let {mode} = this.state;
+    if (mode === 'grid') {
+      this.toggleCell(x, y);
+    }
+    else if (mode === 'words') {
+      this.focusCell(x, y);
+    }
   }
   setCell(x, y, params) {
     let {rows} = this.state;
@@ -137,6 +167,8 @@ class Context extends React.Component {
   }
   focusCell(x, y, flags={}) {
     const {rows, focus, size} = this.state;
+    let word = [ ];
+    let tmpl = [ ];
     const cell = rows[y][x];
     cell.west  = ! cell.black && x > 0 && ! rows[y][x-1].black;
     cell.east  = ! cell.black && x < size - 1 && ! rows[y][x+1].black;
@@ -145,11 +177,11 @@ class Context extends React.Component {
     if (cell.focus) {
       // clicking on the currently focussed cell toggles direction
       // (where possible) between horizontal and vertical
-      if (cell.horz && cell.south) {
+      if (cell.horz && (cell.south || cell.north)) {
         cell.horz = false;
         cell.vert = true;
       }
-      else if (cell.vert && cell.east) {
+      else if (cell.vert && (cell.east || cell.west)) {
         cell.vert = false;
         cell.horz = true;
       }
@@ -160,11 +192,11 @@ class Context extends React.Component {
         const [oldx, oldy] = focus;
         rows[oldy][oldx].focus = false;
       }
-      if (cell.east && ! (flags.vert && cell.south)) {
+      if ((cell.east || cell.west) && ! flags.vert) {
         cell.horz = true;
         cell.vert = false;
       }
-      else if (cell.south) {
+      else if ((cell.south || cell.north) && ! flags.horz) {
         cell.vert = true;
         cell.horz = false;
       }
@@ -173,8 +205,36 @@ class Context extends React.Component {
         cell.horz = false;
       }
     }
+    if (cell.vert) {
+      for (let y = 0; y < size; y++) {
+        const c = rows[y][cell.x];
+        if (c.down === cell.down) {
+          tmpl.push(c.across ? (c.letter || '_') : '_');
+          word.push(c.letter || '_');
+        }
+      }
+    }
+    else if (cell.horz) {
+      for (let x = 0; x < size; x++) {
+        const c = rows[cell.y][x];
+        if (c.across === cell.across) {
+          tmpl.push(c.down ? (c.letter || '_') : '_');
+          word.push(c.letter || '_');
+        }
+      }
+    }
     this.installKeyPressHandler();
-    this.setState({ rows: [...rows], focus: [x,y]});
+    this.setState({
+      rows: [...rows],
+      focus: [x,y],
+      cell,
+      down: cell.down,
+      across: cell.across,
+      horz: cell.horz,
+      vert: cell.vert,
+      word: word.map( c => c === ' ' ? '_' : c).join(''),
+      template: tmpl.map( c => c === ' ' ? '_' : c).join(''),
+    });
   }
   blurCell() {
     const {rows, focus} = this.state;
@@ -183,7 +243,16 @@ class Context extends React.Component {
       rows[oldy][oldx].focus = false;
     }
     this.removeKeyPressHandler();
-    this.setState({ rows: [...rows], focus: false});
+    this.setState({
+      rows: [...rows],
+      focus: false,
+      cell: false,
+      down: false,
+      across: false,
+      horz: false,
+      vert: false,
+      word: false
+    });
   }
   checkCells(rows) {
     const {size} = this.state;
@@ -215,6 +284,12 @@ class Context extends React.Component {
         }
         if (cell.number) {
           number++;
+        }
+        if (! cell.across && x > 0) {
+          cell.across = rows[y][x-1].across
+        }
+        if (! cell.down && y > 0) {
+          cell.down = rows[y-1][x].down
         }
       }
     }
@@ -267,26 +342,26 @@ class Context extends React.Component {
   }
   moveLeft() {
     const {focus} = this.state;
-    if (focus && focus[0] > 0) {
-      this.focusCell(focus[0] - 1, focus[1], { horz: true });
+    if (focus) {
+      this.focusCell(focus[0] - (focus[0] > 0 ? 1 : 0), focus[1], { horz: true });
     }
   }
   moveRight() {
     const {focus, size} = this.state;
-    if (focus && focus[0] < size - 1) {
-      this.focusCell(focus[0] + 1, focus[1], { horz: true });
+    if (focus) {
+      this.focusCell(focus[0] + ((focus[0] < size - 1) ? 1 : 0), focus[1], { horz: true });
     }
   }
   moveUp() {
     const {focus} = this.state;
-    if (focus && focus[1] > 0) {
-      this.focusCell(focus[0], focus[1] - 1, { vert: true });
+    if (focus) {
+      this.focusCell(focus[0], focus[1] - (focus[1] > 0 ? 1 : 0), { vert: true });
     }
   }
   moveDown() {
     const {focus, size} = this.state;
-    if (focus && focus[1] < size - 1) {
-      this.focusCell(focus[0], focus[1] + 1, { vert: true });
+    if (focus) {
+      this.focusCell(focus[0], focus[1] + ((focus[1] < size - 1) ? 1 : 0), { vert: true });
     }
   }
   moveForward() {
@@ -318,7 +393,9 @@ class Context extends React.Component {
     if (! focus) return;
     const [x, y] = focus;
     const cell = rows[y][x];
-    cell.letter = letter;
+    if (! cell.black || ! letter || ! letter.length) {
+      cell.letter = letter;
+    }
     this.setState({ rows: this.checkCells([...rows]) });
   }
   clearLetter() {

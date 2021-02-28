@@ -26,6 +26,7 @@ solid:
   - file-export
   - file-import
   - font
+  - question
   - save
   - times
   - trash
